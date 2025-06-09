@@ -1,0 +1,40 @@
+{
+  "devices": [
+    {
+      "id": "1749443315196",
+      "name": "PS-1",
+      "hourlyRate": 25,
+      "status": "متاح",
+      "currentSession": null
+    },
+    {
+      "id": "1749443323807",
+      "name": "PS-2",
+      "hourlyRate": 25,
+      "status": "متاح",
+      "currentSession": null
+    },
+    {
+      "id": "1749443335241",
+      "name": "PS-3",
+      "hourlyRate": 25,
+      "status": "متاح",
+      "currentSession": null
+    },
+    {
+      "id": "1749443344487",
+      "name": "PS-4",
+      "hourlyRate": 25,
+      "status": "متاح",
+      "currentSession": null
+    },
+    {
+      "id": "1749443350942",
+      "name": "PS-5",
+      "hourlyRate": 25,
+      "status": "متاح",
+      "currentSession": null
+    }
+  ],
+  "sessions": []
+}

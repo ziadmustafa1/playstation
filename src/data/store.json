@@ -1,0 +1,20 @@
+{
+  "devices": [
+    { "id": 1, "name": "PlayStation 5 - 1", "type": "PS5", "status": "متاح", "hourlyRate": 25, "totalHours": 0, "customer": null },
+    { "id": 2, "name": "PlayStation 5 - 2", "type": "PS5", "status": "مشغول", "hourlyRate": 25, "totalHours": 2.5, "customer": "أحمد محمد" },
+    { "id": 3, "name": "PlayStation 4 - 1", "type": "PS4", "status": "متاح", "hourlyRate": 20, "totalHours": 0, "customer": null },
+    { "id": 4, "name": "Xbox Series X", "type": "Xbox", "status": "صيانة", "hourlyRate": 23, "totalHours": 0, "customer": null },
+    { "id": 5, "name": "Gaming PC - 1", "type": "PC", "status": "مشغول", "hourlyRate": 30, "totalHours": 1.2, "customer": "سارة أحمد" },
+    { "id": 6, "name": "Nintendo Switch", "type": "Switch", "status": "متاح", "hourlyRate": 18, "totalHours": 0, "customer": null }
+  ],
+  "customers": [
+    { "id": 1, "name": "أحمد محمد", "phone": "01234567890", "totalSpent": 450, "visits": 12, "membership": "ذهبي" },
+    { "id": 2, "name": "سارة أحمد", "phone": "01987654321", "totalSpent": 280, "visits": 8, "membership": "فضي" },
+    { "id": 3, "name": "محمد علي", "phone": "01122334455", "totalSpent": 150, "visits": 4, "membership": "عادي" }
+  ],
+  "sessions": [
+    { "id": 1, "deviceId": 2, "customerName": "أحمد محمد", "startTime": "14:30", "duration": 2.5, "cost": 62.5, "status": "نشط" },
+    { "id": 2, "deviceId": 5, "customerName": "سارة أحمد", "startTime": "15:45", "duration": 1.2, "cost": 36, "status": "نشط" },
+    { "id": 3, "deviceId": 1, "customerName": "محمد علي", "startTime": "13:00", "duration": 3, "cost": 75, "status": "مكتمل" }
+  ]
+} 
