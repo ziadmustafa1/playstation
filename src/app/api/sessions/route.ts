@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
-import { Session } from '@/types'
+import { Device, Session } from '@/types'
 import os from 'os'
 
 // تغيير مسار الملف ليكون في مجلد tmp في بيئة الإنتاج
@@ -33,7 +33,7 @@ async function readData() {
   }
 }
 
-async function writeData(data: { devices: any[], sessions: Session[] }) {
+async function writeData(data: { devices: Device[], sessions: Session[] }) {
   try {
     await fs.writeFile(getDataFilePath(), JSON.stringify(data, null, 2), 'utf8')
   } catch (error) {
