@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function GET() {
   try {
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
         name: newDevice.name,
         hourlyRate: parseFloat(newDevice.hourlyRate),
         status: 'متاح',
-        currentSession: null
+        currentSession: null as any
       }
     })
     
@@ -39,6 +40,10 @@ export async function PATCH(request: Request) {
   try {
     const update = await request.json()
     const { id, ...changes } = update
+
+    if ('currentSession' in changes) {
+      changes.currentSession = changes.currentSession as any
+    }
 
     const device = await prisma.device.update({
       where: { id },
