@@ -1,20 +1,17 @@
 import { NextResponse } from 'next/server'
-import { promises as fs } from 'fs'
-import path from 'path'
-
-const dataFilePath = path.join(process.cwd(), 'src/data/db.json')
+import { prisma } from '@/lib/prisma'
 
 export async function POST() {
   try {
-    const emptyData = {
-      devices: [],
-      sessions: []
-    }
+    // Delete all sessions first to avoid foreign key constraints
+    await prisma.session.deleteMany()
     
-    await fs.writeFile(dataFilePath, JSON.stringify(emptyData, null, 2), 'utf8')
+    // Then delete all devices
+    await prisma.device.deleteMany()
+    
     return NextResponse.json({ message: 'تم مسح البيانات بنجاح' })
   } catch (error) {
     console.error('Error resetting data:', error)
-    return new NextResponse('فشل في مسح البيانات', { status: 500 })
+    return NextResponse.json({ error: 'فشل في مسح البيانات' }, { status: 500 })
   }
 } 
