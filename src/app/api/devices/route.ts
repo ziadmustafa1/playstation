@@ -1,95 +1,73 @@
 import { NextResponse } from 'next/server'
-import { promises as fs } from 'fs'
-import path from 'path'
-import { Device } from '@/types'
-import { Session } from '@/types'
-import os from 'os'
-
-// تغيير مسار الملف ليكون في مجلد tmp في بيئة الإنتاج
-const getDataFilePath = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return path.join(os.tmpdir(), 'db.json')
-  }
-  return path.join(process.cwd(), 'src/data/db.json')
-}
-
-async function ensureFileExists() {
-  const filePath = getDataFilePath()
-  try {
-    await fs.access(filePath)
-  } catch {
-    // إذا لم يكن الملف موجوداً، قم بإنشائه مع البيانات الأولية
-    await fs.writeFile(filePath, JSON.stringify({ devices: [], sessions: [] }, null, 2), 'utf8')
-  }
-}
-
-async function readData() {
-  try {
-    await ensureFileExists()
-    const data = await fs.readFile(getDataFilePath(), 'utf8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.error('Error reading data:', error)
-    return { devices: [], sessions: [] }
-  }
-}
-
-async function writeData(data: { devices: Device[], sessions: Session[] }) {
-  try {
-    await fs.writeFile(getDataFilePath(), JSON.stringify(data, null, 2), 'utf8')
-  } catch (error) {
-    console.error('Error writing data:', error)
-    throw new Error('فشل في حفظ البيانات')
-  }
-}
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
-  const data = await readData()
-  return NextResponse.json(data.devices)
+  try {
+    const devices = await prisma.device.findMany({
+      include: {
+        sessions: true
+      }
+    })
+    return NextResponse.json(devices)
+  } catch (error) {
+    console.error('Error fetching devices:', error)
+    return NextResponse.json({ error: 'Failed to fetch devices' }, { status: 500 })
+  }
 }
 
 export async function POST(request: Request) {
-  const data = await readData()
-  const newDevice = await request.json()
-  
-  const device = {
-    id: Date.now().toString(),
-    ...newDevice,
-    status: 'متاح',
-    currentSession: null
+  try {
+    const newDevice = await request.json()
+    
+    const device = await prisma.device.create({
+      data: {
+        name: newDevice.name,
+        hourlyRate: parseFloat(newDevice.hourlyRate),
+        status: 'متاح',
+        currentSession: null
+      }
+    })
+    
+    return NextResponse.json(device)
+  } catch (error) {
+    console.error('Error creating device:', error)
+    return NextResponse.json({ error: 'Failed to create device' }, { status: 500 })
   }
-  
-  data.devices.push(device)
-  await writeData(data)
-  
-  return NextResponse.json(device)
 }
 
 export async function PATCH(request: Request) {
-  const data = await readData()
-  const update = await request.json()
-  const { id, ...changes } = update
+  try {
+    const update = await request.json()
+    const { id, ...changes } = update
 
-  const deviceIndex = data.devices.findIndex((d: Device) => d.id === id)
-  if (deviceIndex === -1) {
-    return new NextResponse('Device not found', { status: 404 })
+    const device = await prisma.device.update({
+      where: { id },
+      data: changes
+    })
+
+    return NextResponse.json(device)
+  } catch (error) {
+    console.error('Error updating device:', error)
+    return NextResponse.json({ error: 'Failed to update device' }, { status: 500 })
   }
-
-  data.devices[deviceIndex] = { ...data.devices[deviceIndex], ...changes }
-  await writeData(data)
-
-  return NextResponse.json(data.devices[deviceIndex])
 }
 
 export async function DELETE(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const id = searchParams.get('id')
-  
-  if (!id) return new NextResponse('ID is required', { status: 400 })
-  
-  const data = await readData()
-  data.devices = data.devices.filter((d: Device) => d.id !== id)
-  await writeData(data)
-  
-  return new NextResponse(null, { status: 204 })
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
+    
+    await prisma.device.delete({
+      where: { id }
+    })
+    
+    return new NextResponse(null, { status: 204 })
+  } catch (error) {
+    console.error('Error deleting device:', error)
+    return NextResponse.json({ error: 'Failed to delete device' }, { status: 500 })
+  }
 } 

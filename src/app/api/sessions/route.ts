@@ -1,79 +1,65 @@
 import { NextResponse } from 'next/server'
-import { promises as fs } from 'fs'
-import path from 'path'
-import { Device, Session } from '@/types'
-import os from 'os'
-
-// تغيير مسار الملف ليكون في مجلد tmp في بيئة الإنتاج
-const getDataFilePath = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return path.join(os.tmpdir(), 'db.json')
-  }
-  return path.join(process.cwd(), 'src/data/db.json')
-}
-
-async function ensureFileExists() {
-  const filePath = getDataFilePath()
-  try {
-    await fs.access(filePath)
-  } catch {
-    // إذا لم يكن الملف موجوداً، قم بإنشائه مع البيانات الأولية
-    await fs.writeFile(filePath, JSON.stringify({ devices: [], sessions: [] }, null, 2), 'utf8')
-  }
-}
-
-async function readData() {
-  try {
-    await ensureFileExists()
-    const data = await fs.readFile(getDataFilePath(), 'utf8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.error('Error reading data:', error)
-    return { devices: [], sessions: [] }
-  }
-}
-
-async function writeData(data: { devices: Device[], sessions: Session[] }) {
-  try {
-    await fs.writeFile(getDataFilePath(), JSON.stringify(data, null, 2), 'utf8')
-  } catch (error) {
-    console.error('Error writing data:', error)
-    throw new Error('فشل في حفظ البيانات')
-  }
-}
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
-  const data = await readData()
-  return NextResponse.json(data.sessions)
+  try {
+    const sessions = await prisma.session.findMany({
+      include: {
+        device: true
+      }
+    })
+    return NextResponse.json(sessions)
+  } catch (error) {
+    console.error('Error fetching sessions:', error)
+    return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
+  }
 }
 
 export async function POST(request: Request) {
-  const data = await readData()
-  const newSession = await request.json()
-  
-  const session = {
-    id: Date.now().toString(),
-    ...newSession
+  try {
+    const newSession = await request.json()
+    
+    const session = await prisma.session.create({
+      data: {
+        deviceId: newSession.deviceId,
+        startTime: new Date(newSession.startTime),
+        status: newSession.status
+      },
+      include: {
+        device: true
+      }
+    })
+    
+    return NextResponse.json(session)
+  } catch (error) {
+    console.error('Error creating session:', error)
+    return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
   }
-  
-  data.sessions.push(session)
-  await writeData(data)
-  
-  return NextResponse.json(session)
 }
 
 export async function PATCH(request: Request) {
-  const data = await readData()
-  const update = await request.json()
-  const { id, ...changes } = update
+  try {
+    const update = await request.json()
+    const { id, ...changes } = update
 
-  const sessionIndex = data.sessions.findIndex((s: Session) => s.id === id)
-  if (sessionIndex === -1) {
-    return new NextResponse('Session not found', { status: 404 })
+    if (changes.startTime) {
+      changes.startTime = new Date(changes.startTime)
+    }
+    if (changes.endTime) {
+      changes.endTime = new Date(changes.endTime)
+    }
+
+    const session = await prisma.session.update({
+      where: { id },
+      data: changes,
+      include: {
+        device: true
+      }
+    })
+
+    return NextResponse.json(session)
+  } catch (error) {
+    console.error('Error updating session:', error)
+    return NextResponse.json({ error: 'Failed to update session' }, { status: 500 })
   }
-
-  data.sessions[sessionIndex] = { ...data.sessions[sessionIndex], ...changes }
-  await writeData(data)
-
-  return NextResponse.json(data.sessions[sessionIndex])
 } 

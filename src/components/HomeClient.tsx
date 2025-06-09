@@ -139,11 +139,16 @@ export default function HomeClient() {
           },
           body: JSON.stringify({
             name: newDevice.name,
-            hourlyRate: parseFloat(newDevice.hourlyRate)
+            hourlyRate: parseFloat(newDevice.hourlyRate),
+            status: 'متاح',
+            currentSession: null
           })
         })
 
-        if (!res.ok) throw new Error('فشل في إضافة الجهاز')
+        if (!res.ok) {
+          const error = await res.json()
+          throw new Error(error.error || 'فشل في إضافة الجهاز')
+        }
 
         setIsAddingDevice(false)
         setNewDevice({ name: '', hourlyRate: '' })
@@ -151,7 +156,7 @@ export default function HomeClient() {
         resolve('تم إضافة الجهاز بنجاح')
       } catch (error) {
         console.error('Error adding device:', error)
-        reject('حدث خطأ أثناء إضافة الجهاز')
+        reject(error instanceof Error ? error.message : 'حدث خطأ أثناء إضافة الجهاز')
       }
     })
 
