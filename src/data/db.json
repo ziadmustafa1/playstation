@@ -36,5 +36,15 @@
       "currentSession": null
     }
   ],
-  "sessions": []
+  "sessions": [
+    {
+      "id": "1749445543658",
+      "deviceId": "1749443315196",
+      "startTime": "2025-06-09T05:05:43.617Z",
+      "status": "منتهية",
+      "endTime": "2025-06-09T05:05:47.035Z",
+      "duration": 0.0009494444444444445,
+      "cost": 1
+    }
+  ]
 }

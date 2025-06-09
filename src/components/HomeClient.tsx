@@ -244,6 +244,10 @@ export default function HomeClient() {
     const promise = new Promise<SessionEndResult>(async (resolve, reject) => {
       try {
         const deviceRes = await fetch(`/api/devices/${deviceId}`)
+        if (!deviceRes.ok) {
+          const errorData = await deviceRes.json()
+          throw new Error(errorData.error || 'فشل في العثور على الجهاز')
+        }
         const device = await deviceRes.json()
 
         if (!device.currentSession) throw new Error('لا توجد جلسة نشطة')
@@ -292,7 +296,7 @@ export default function HomeClient() {
         resolve({ message: 'تم إنهاء الجلسة بنجاح', duration, cost })
       } catch (error) {
         console.error('Error ending session:', error)
-        reject('حدث خطأ أثناء إنهاء الجلسة')
+        reject(error instanceof Error ? error.message : 'حدث خطأ أثناء إنهاء الجلسة')
       }
     })
 
