@@ -4,10 +4,10 @@ import { Device } from '@/types'
 interface DeviceCardProps {
   device: Device
   timer: number
-  onStartSession: (deviceId: number) => void
-  onEndSession: (deviceId: number) => void
+  onStartSession: (deviceId: string) => void
+  onEndSession: (deviceId: string) => void
   onEditDevice: (device: Device) => void
-  onDeleteDevice: (deviceId: number) => void
+  onDeleteDevice: (deviceId: string) => void
   formatTime: (seconds: number) => string
   formatDate: (date: string) => string
 }

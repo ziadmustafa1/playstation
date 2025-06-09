@@ -1,5 +1,5 @@
 export interface Device {
-  id: number;
+  id: string;
   name: string;
   hourlyRate: number;
   status: 'متاح' | 'مشغول';
@@ -11,7 +11,7 @@ export interface Device {
 
 export interface Session {
   id: number;
-  deviceId: number;
+  deviceId: string;
   startTime: string;
   endTime?: string;
   duration?: number;

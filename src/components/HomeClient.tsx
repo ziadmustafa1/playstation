@@ -85,7 +85,7 @@ export default function HomeClient() {
     }
   }
 
-  async function handleDeleteDevice(deviceId: number) {
+  async function handleDeleteDevice(deviceId: string) {
     const promise = new Promise<string>(async (resolve, reject) => {
       try {
         const res = await fetch(`/api/devices?id=${deviceId}`, {
@@ -172,7 +172,7 @@ export default function HomeClient() {
     })
   }
 
-  async function handleStartSession(deviceId: number) {
+  async function handleStartSession(deviceId: string) {
     const promise = new Promise<string>(async (resolve, reject) => {
       try {
         const startTime = new Date().toISOString()
@@ -240,7 +240,7 @@ export default function HomeClient() {
     cost: number;
   }
 
-  async function handleEndSession(deviceId: number) {
+  async function handleEndSession(deviceId: string) {
     const promise = new Promise<SessionEndResult>(async (resolve, reject) => {
       try {
         const deviceRes = await fetch(`/api/devices/${deviceId}`)
